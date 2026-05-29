@@ -1,0 +1,84 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "range-lab"
+version = "0.0.1"
+description = "Range — declarative, ephemeral, AI-native cyber-range platform."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "typer>=0.12",
+]
+
+[project.scripts]
+range = "rangelab.cli.main:app"
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "mypy",
+    "pytest",
+    "pytest-cov",
+    "pytest-asyncio",
+    "hypothesis",
+    "import-linter",
+    "pre-commit",
+]
+
+# dist name (range-lab) != import name (rangelab), so point hatchling at the package.
+[tool.hatch.build.targets.wheel]
+packages = ["src/rangelab"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+mypy_path = "src"
+packages = ["rangelab"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=rangelab --cov-report=term-missing --cov-fail-under=90"
+# Register integration markers so unmarked CI never tries to run infra-gated tests.
+markers = [
+    "docker: requires a Docker daemon (skips when absent)",
+    "postgres: requires a Postgres instance (skips when absent)",
+]
+
+[tool.coverage.run]
+source = ["src/rangelab"]
+branch = true
+
+[tool.importlinter]
+root_package = "rangelab"
+
+[[tool.importlinter.contracts]]
+name = "Layered architecture — no upward imports"
+type = "layers"
+# Highest layer first; a layer may import any layer BELOW it, never above.
+layers = [
+    "rangelab.cli",
+    "rangelab.run",
+    "rangelab.report",
+    "rangelab.orchestrator",
+    "rangelab.agents",
+    "rangelab.inspect_bridge",
+    "rangelab.provision",
+    "rangelab.scoring",
+    "rangelab.trace",
+    "rangelab.spec",
+    "rangelab.config",
+    "rangelab.common",
+]
+
+[[tool.importlinter.contracts]]
+name = "provision and trace are independent"
+type = "independence"
+modules = ["rangelab.provision", "rangelab.trace"]
