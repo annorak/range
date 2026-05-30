@@ -36,3 +36,13 @@ jobs:
       - run: uv sync
       - run: uv run lint-imports
       - run: uv run pytest
+
+  infra:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      # No OCI creds and no apply/plan against real OCI — validate only.
+      - run: terraform -chdir=deploy/terraform fmt -check -recursive
+      - run: terraform -chdir=deploy/terraform init -backend=false
+      - run: terraform -chdir=deploy/terraform validate

@@ -20,3 +20,11 @@ dist/
 
 # macOS
 .DS_Store
+
+# Terraform — never commit real vars, state, plans, or provider cache.
+*.tfvars
+!*.tfvars.example
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
