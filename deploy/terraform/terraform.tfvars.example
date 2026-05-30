@@ -1,0 +1,26 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is git-ignored — never
+# commit real OCIDs or keys.
+
+# --- Required ---
+region           = "us-ashburn-1"
+compartment_ocid = "ocid1.compartment.oc1..xxxxxxxxxxxxxxxxxxxxxxxx"
+tenancy_ocid     = "ocid1.tenancy.oc1..xxxxxxxxxxxxxxxxxxxxxxxx"
+ssh_public_key   = "ssh-ed25519 AAAA... operator@host"
+
+# Lock SSH to your own IP — do NOT leave this at 0.0.0.0/0 in practice.
+allowed_ssh_cidr = "203.0.113.4/32"
+
+# --- Optional (sane defaults in variables.tf) ---
+# instance_shape     = "VM.Standard.E4.Flex"
+# instance_ocpus     = 4
+# instance_memory_gb = 24
+# block_volume_gb    = 100
+# env                = "dev"
+
+# Pin a specific image OCID to make the host fully reproducible; otherwise the
+# latest Ubuntu 24.04 x86_64 is looked up at apply time.
+# os_image_ocid = "ocid1.image.oc1..xxxxxxxxxxxxxxxxxxxxxxxx"
+
+# Optional Tailscale enrollment (default off). Provide an auth key to join the
+# host to your tailnet on first boot.
+# tailscale_auth_key = "tskey-auth-xxxxxxxxxxxx"
