@@ -8,9 +8,15 @@ class RangeError(Exception):
 
     code: str = "range.error"  # subclasses override
 
-    def __init__(self, message: str, *, hint: str | None = None) -> None:
+    def __init__(
+        self, message: str, *, code: str | None = None, hint: str | None = None
+    ) -> None:
         super().__init__(message)
         self.message = message
+        # Per-instance override of the class default, so one error class can carry
+        # several stable codes (e.g. SpecError → spec.parse / spec.schema).
+        if code is not None:
+            self.code = code
         self.hint = hint
 
     def __str__(self) -> str:

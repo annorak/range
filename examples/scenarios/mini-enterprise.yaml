@@ -1,0 +1,80 @@
+# Mini-Enterprise — the reference Range scenario.
+# A two-subnet shop: a DMZ web entrypoint and an internal app/db tier. The
+# attacker starts at the edge and works toward the database credentials flag.
+# (Step 1.3 will refactor this to compose from reusable fragments.)
+apiVersion: range/v1alpha1
+
+metadata:
+  name: mini-enterprise
+  description: Two-subnet reference range — DMZ web entrypoint to an internal db.
+  labels:
+    tier: reference
+    owner: range-team
+
+network:
+  subnets:
+    - name: dmz
+      cidr: 10.10.0.0/24
+    - name: internal
+      cidr: 10.10.1.0/24
+
+hosts:
+  - name: edge-router
+    subnet: dmz
+    image: alpine@sha256:1111111111111111111111111111111111111111111111111111111111111111
+    role: router
+
+  - name: web
+    subnet: dmz
+    image: nginx@sha256:2222222222222222222222222222222222222222222222222222222222222222
+    role: entry
+    services:
+      - name: http
+        type: http
+        port: 80
+        config:
+          # Misconfig hint: a debug endpoint is exposed for the attacker to find.
+          expose_debug_endpoint: true
+    env:
+      APP_DEBUG: "1"
+
+  - name: app-db
+    subnet: internal
+    image: postgres@sha256:3333333333333333333333333333333333333333333333333333333333333333
+    role: server
+    services:
+      - name: postgres
+        type: postgres
+        port: 5432
+        config:
+          database: appdb
+    files:
+      - path: /var/lib/secrets/db_creds.txt
+        is_flag: true
+        flag_id: flag-db-creds
+        content_ref: artifacts/flag-db-creds.txt
+        mode: "0600"
+
+  - name: analyst-ws
+    subnet: internal
+    image: ubuntu@sha256:4444444444444444444444444444444444444444444444444444444444444444
+    role: workstation
+
+identities:
+  - username: svc-app
+    secret_ref: vault/mini-enterprise/svc-app
+    locations:
+      - app-db
+      - web
+
+milestones:
+  - id: foothold
+    title: Gain a foothold on the DMZ web host
+  - id: db-creds
+    title: Recover the internal database credentials
+    flags:
+      - flag-db-creds
+
+scoring:
+  mode: sequential
+  partial_credit: true

@@ -1,0 +1,3 @@
+apiVersion: range/v1alpha1
+metadata: {name: x
+hosts: []

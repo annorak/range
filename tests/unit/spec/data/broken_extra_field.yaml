@@ -1,0 +1,13 @@
+apiVersion: range/v1alpha1
+metadata:
+  name: broken
+network:
+  subnets:
+    - name: dmz
+      cidr: 10.0.0.0/24
+hosts:
+  - name: web
+    subnet: dmz
+    image: nginx@sha256:1111111111111111111111111111111111111111111111111111111111111111
+    role: entry
+    bogus_field: true
